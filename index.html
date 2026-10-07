@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>신라대학교 MBTI 학과 매칭 연구소</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-grad: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #090d16 100%);
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-grad);
+            color: #1e293b;
+            font-family: 'Noto Sans KR', sans-serif;
+            width: 100vw; height: 100vh;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        #game-wrapper {
+            width: 1150px; max-width: 98vw;
+            height: 96vh; max-height: 940px;
+            background: #fff;
+            border: 5px solid #6366f1;
+            border-radius: 25px;
+            display: flex; flex-direction: column;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(99, 102, 241, 0.4);
+        }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px dashed #cbd5e1;
+            padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0;
+        }
+
+        h1 {
+            margin: 0; font-family: 'Jua', sans-serif; font-size: 26px;
+            color: #4338ca;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .header-badge {
+            background: #4f46e5; color: white; font-size: 13px;
+            padding: 4px 12px; border-radius: 20px; font-weight: 700;
+        }
+
+        /* --- 화면 1: 시작 화면 --- */
+        #screen-start {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px;
+        }
+        .start-title {
+            font-family: 'Jua', sans-serif; font-size: 32px; color: #312e81; margin: 0;
+        }
+        .start-desc {
+            font-size: 16px; font-weight: 700; color: #475569; line-height: 1.6; max-width: 750px;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; font-family: 'Jua', sans-serif;
+            font-size: 22px; padding: 16px 45px; border-radius: 20px; border: none; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); transition: all 0.2s;
+        }
+        .start-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(79, 70, 229, 0.6); }
+
+        /* --- 화면 2: 4지선다 질문 화면 --- */
+        #screen-quiz {
+            flex: 1; display: none; flex-direction: column; justify-content: space-between; padding: 10px 30px; overflow-y: auto;
+        }
+        .quiz-progress-bar {
+            width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 8px;
+        }
+        .quiz-progress-fill {
+            height: 100%; background: #4f46e5; width: 0%; transition: width 0.3s ease;
+        }
+        .quiz-step-txt {
+            font-family: 'Jua', sans-serif; font-size: 16px; color: #4f46e5; text-align: center; margin-bottom: 12px;
+        }
+        .quiz-question-box {
+            background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 20px; padding: 20px;
+            text-align: center; font-family: 'Jua', sans-serif; font-size: 22px; color: #1e293b;
+            min-height: 100px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03); margin-bottom: 15px;
+        }
+        .quiz-choices {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px;
+        }
+        .choice-btn {
+            background: #ffffff; border: 3px solid #cbd5e1; border-radius: 16px; padding: 16px 20px;
+            font-family: 'Jua', sans-serif; font-size: 16px; color: #334155; cursor: pointer; text-align: left;
+            transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 12px;
+        }
+        .choice-btn:hover {
+            border-color: #4f46e5; background: #eef2ff; transform: translateY(-2px); color: #4338ca;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.15);
+        }
+        .choice-badge {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-family: 'Jua'; color: white; font-size: 16px;
+        }
+
+        /* --- 화면 3: 결과 화면 --- */
+        #screen-result {
+            flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-y: auto; padding: 10px;
+        }
+        .result-card {
+            background: #f8fafc; border: 4px solid #6366f1; border-radius: 24px; padding: 20px;
+            width: 100%; max-width: 900px; box-shadow: 0 15px 40px rgba(79, 70, 229, 0.15);
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .result-mbti-tag {
+            background: #4f46e5; color: white; font-family: 'Jua', sans-serif; font-size: 18px;
+            padding: 5px 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .result-dept-title {
+            font-family: 'Jua', sans-serif; font-size: 28px; color: #312e81; margin: 0;
+        }
+        .result-cartoon-box {
+            width: 150px; height: 150px; background: #e0e7ff; border: 4px dashed #6366f1; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 65px;
+            box-shadow: 0 10px 25px rgba(79,70,229,0.2); margin: 2px 0;
+        }
+        .result-desc {
+            font-size: 14px; font-weight: 700; color: #475569; line-height: 1.5; max-width: 750px;
+        }
+        .result-career-badge {
+            background: #fef3c7; border: 2px solid #fcd34d; color: #b45309; font-family: 'Jua', sans-serif;
+            font-size: 14px; padding: 6px 18px; border-radius: 14px;
+        }
+        .sub-depts-box {
+            font-size: 13px; font-weight: 700; color: #4f46e5; background: #eef2ff; padding: 8px 15px; border-radius: 12px; border: 1px solid #c7d2fe;
+        }
+
+        #quick-toast {
+            display: none; position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #f8fafc; border: 3px solid #fbbf24; padding: 10px 25px;
+            border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 17px; z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: bounceIn 0.3s ease; white-space: nowrap;
+        }
+        @keyframes bounceIn {
+            0% { transform: translateX(-50%) scale(0.7); opacity: 0; }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div id="quick-toast">✨ 답변 완료!</div>
+
+        <header>
+            <h1>🔮 신라대학교 MBTI 학과 매칭 연구소 v2.0 <span class="header-badge">4지선다형</span></h1>
+            <div style="font-family: 'Jua', sans-serif; color: #4f46e5; font-size: 14px;">
+                더 정교해진 16가지 성향과 신라대 특성화 학과 총집합!
+            </div>
+        </header>
+
+        <!-- 1. 시작 화면 -->
+        <div id="screen-start">
+            <div style="font-size: 65px;">🤪🚀</div>
+            <h2 class="start-title">내 영혼의 단짝 학과는 과연 어디일까?</h2>
+            <p class="start-desc">
+                더욱 강력해진 4지선다형 질문 8가지를 통해 신라대학교의 다양한 특성화 학과(항공, 보건, 사범, 예체능, IT, 디자인 등) 중 당신에게 딱 맞는 운명의 학과를 찾아드립니다! (폭소 주의 🤣)
+            </p>
+            <button class="start-btn" onclick="startQuiz()">테스트 시작하기 🎯</button>
+        </div>
+
+        <!-- 2. 질문 화면 (4지선다형) -->
+        <div id="screen-quiz">
+            <div>
+                <div class="quiz-step-txt" id="quiz-step-txt">QUESTION 1 / 8</div>
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+                </div>
+            </div>
+            
+            <div class="quiz-question-box" id="quiz-q-text">
+                질문 내용이 여기에 들어갑니다.
+            </div>
+
+            <div class="quiz-choices">
+                <button class="choice-btn" onclick="answerQuestion(0)">
+                    <span class="choice-badge" style="background: #4f46e5;">A</span>
+                    <span id="txt-choice-0">선택지 1</span>
+                </button>
+                <button class="choice-btn" onclick="answerQuestion(1)">
+                    <span class="choice-badge" style="background: #10b981;">B</span>
+                    <span id="txt-choice-1">선택지 2</span>
+                </button>
+                <button class="choice-btn" onclick="answerQuestion(2)">
+                    <span class="choice-badge" style="background: #f59e0b;">C</span>
+                    <span id="txt-choice-2">선택지 3</span>
+                </button>
+                <button class="choice-btn" onclick="answerQuestion(3)">
+                    <span class="choice-badge" style="background: #ef4444;">D</span>
+                    <span id="txt-choice-3">선택지 4</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. 결과 화면 -->
+        <div id="screen-result">
+            <div class="result-card">
+                <div class="result-mbti-tag" id="res-mbti-tag">당신의 MBTI: ENFP</div>
+                <div class="result-cartoon-box" id="res-cartoon-emoji">✈️🤪</div>
+                <h2 class="result-dept-title" id="res-dept-title">항공서비스학과</h2>
+                <div class="sub-depts-box" id="res-sub-depts">🔗 관련 연계 학과: 항공운항학과, 호텔관광학과 등</div>
+                <div class="result-desc" id="res-desc">
+                    결과 설명이 여기에 들어갑니다.
+                </div>
+                <div class="result-career-badge" id="res-career-badge">
+                    🎯 추천 진로: 대형 항공사 수석 객실승무원 및 글로벌 인플루언서
+                </div>
+                <button class="start-btn" style="font-size: 16px; padding: 10px 30px; margin-top: 5px;" onclick="resetQuiz()">테스트 다시 하기 🔄</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let audioCtx = null;
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                let now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(700, now + 0.05);
+                    gainNode.gain.setValueAtTime(0.1, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now); osc.stop(now + 0.05);
+                } else if (type === 'success') {
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    gainNode.gain.setValueAtTime(0.15, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                }
+            } catch (e) {}
+        }
+
+        /* 4지선다형 질문 데이터 (각 선택지가 E/I, N/S, T/F, J/P 점수 부여) */
+        const questions = [
+            {
+                q: "주말에 친구가 갑자기 '나 지금 부산역인데 놀러 와!'라고 연락했을 때 나의 반응은?",
+                choices: [
+                    { text: "오예! 당장 나가서 광란의 해운대 투어 코스를 3개 이상 즉흥적으로 짜서 달린다.", dim: "E" },
+                    { text: "'집에 누워있는데 왜...' 읽씹할까 3초 고민하다 이불 속에서 거절 사유를 쥐 짜낸다.", dim: "I" },
+                    { text: "부산역 근처 맛집 데이터베이스를 열어 가성비 최고의 동선을 효율적으로 설계해 준다.", dim: "S" },
+                    { text: "부산역에 나타난 외계인 UFO 침공 상상을 하며 엉뚱한 답장을 보낸다.", dim: "N" }
+                ]
+            },
+            {
+                q: "친구가 길에서 넘어져서 무릎이 까졌을 때 내 머릿속에 가장 먼저 스치는 생각은?",
+                choices: [
+                    { text: "상처 부위 감염 여부와 파상풍 주사 접종 필요성을 냉철하게 분석한다.", dim: "T" },
+                    { text: "너무 아프겠다ㅠㅠ 내 마음이 다 찢어지네 같이 눈물 흘리며 호호 불어준다.", dim: "F" },
+                    { text: "뼈는 괜찮은가? 정형외과 응급 처치 매뉴얼을 머릿속으로 시뮬레이션한다.", dim: "S" },
+                    { text: "이게 다 영화 속 주인공처럼 영웅이 되기 위한 액땜 시나리오라고 위로한다.", dim: "N" }
+                ]
+            },
+            {
+                q: "마트에서 물건을 살 때 나의 장보기 스타일은?",
+                choices: [
+                    { text: "쇼핑 리스트를 품목별로 작성하고 할인율과 최적의 동선을 철저히 계산한다.", dim: "J" },
+                    { text: "'와 이 외계인 인형 너무 귀여운데? 지구를 지킬 것 같아' 충동구매 폭발.", dim: "P" },
+                    { text: "세일 품목과 유통기한을 꼼꼼하게 따져가며 가성비 끝판왕 제품만 담는다.", dim: "S" },
+                    { text: "직원의 화려한 마트 시식 코너 입담에 홀려 예정에 없던 세계 요리 재료를 산다.", dim: "E" }
+                ]
+            },
+            {
+                q: "내 방 책상의 현재 상태를 가장 잘 표현한 것은?",
+                choices: [
+                    { text: "칼각으로 정리된 펜꽂이와 먼지 하나 없는 평화로운 무균 상태의 교과서 정렬.", dim: "J" },
+                    { text: "지구 과학 역사상 발견된 적 없는 미지의 혼돈과 무질서의 유적지 (창조의 현장).", dim: "P" },
+                    { text: "혼돈스러워 보이지만 내 손 닿는 곳에 물건들이 정확히 위치해 있는 유기농 배치.", dim: "I" },
+                    { text: "친구들이 언제든 놀러 와서 파티를 벌여도 될 만큼 온갖 과자 봉지와 잡동사니 개방.", dim: "E" }
+                ]
+            },
+            {
+                q: "좀비 아포칼립스가 발생해 세상이 망하기 직전이다! 내가 제일 먼저 챙길 물건은?",
+                choices: [
+                    { text: "전국 생존자들과 무전을 치기 위한 고출력 무선 통신기 및 확성기.", dim: "E" },
+                    { text: "아무도 찾지 못할 깊은 지하 방공호 비밀번호와 비상용 젤리 100봉지.", dim: "I" },
+                    { text: "생존 지침서와 응급 처치 키트, 그리고 튼튼한 방어구 세트.", dim: "T" },
+                    { text: "좀비와 대화할 수 있는 번역기 연구 장치와 판타지 소설책.", dim: "N" }
+                ]
+            },
+            {
+                q: "로또 1등에 당첨되어 30억 원이 통장에 꽂혔을 때 가장 먼저 할 행동은?",
+                choices: [
+                    { text: "부동산 시세를 분석하고 세금 공제율을 계산하여 안전한 예적금 포트폴리오를 짠다.", dim: "J" },
+                    { text: "우주 여행 티켓을 끊고 화성에 나만의 초대형 대저택을 지을 상상을 하며 싱글벙글 웃는다.", dim: "N" },
+                    { text: "당장 가족들에게 입금 완료 문자를 보내고 파티를 열어 돈을 시원하게 쏜다.", dim: "E" },
+                    { text: "아무에게도 알리지 않고 이불 속에서 은밀하게 주식 계좌 개설법을 공부한다.", dim: "I" }
+                ]
+            },
+            {
+                q: "여행을 떠나기 전날 밤 나의 캐리어 짐 싸기 루틴은?",
+                choices: [
+                    { text: "3일 전에 이미 캐리어 분할 수납을 완료하고 비상 상비약까지 라벨링해 둠.", dim: "J" },
+                    { text: "출발 1시간 전, '가서 사면 되지 뭐' 영혼을 끌어모아 쑤셔 넣기 신공 발휘.", dim: "P" },
+                    { text: "현지 날씨와 일별 코디를 완벽하게 조합하여 의상별로 지퍼백에 압축 포장.", dim: "S" },
+                    { text: "짐 싸기는 귀찮고 친구들과 공항에서 먹을 야식 메뉴 정하느라 밤을 샌다.", dim: "E" }
+                ]
+            },
+            {
+                q: "내일 아침 중요한 면접이나 시험이 있는데 지금 갑자기 밤새워서 게임이 너무 하고 싶다면?",
+                choices: [
+                    { text: "당장 전원을 끄고 알람을 3개 맞춘 뒤 8시간 숙면을 취해 최상의 컨디션을 만든다.", dim: "J" },
+                    { text: "'딱 한 판만 하고 자야지' 하다가 해 뜨는 것을 보며 세수하고 면접장으로 직행.", dim: "P" },
+                    { text: "내일 시험 범위와 면접 예상 질문을 완벽히 숙지한 후 남은 시간 동안만 지능적으로 플레이.", dim: "T" },
+                    { text: "게임 속 세계관에 너무 몰입한 나머지 면접관에게 게임 브리핑을 하겠다는 상상을 함.", dim: "N" }
+                ]
+            }
+        ];
+
+        let currentIdx = 0;
+        let scores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
+
+        function startQuiz() {
+            playSound('success');
+            currentIdx = 0;
+            scores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
+            document.getElementById('screen-start').style.display = 'none';
+            document.getElementById('screen-quiz').style.display = 'flex';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentIdx >= questions.length) {
+                showResult();
+                return;
+            }
+            let q = questions[currentIdx];
+            document.getElementById('quiz-step-txt').innerText = `QUESTION ${currentIdx + 1} / ${questions.length}`;
+            let pct = ((currentIdx) / questions.length) * 100;
+            document.getElementById('quiz-progress-fill').style.width = pct + '%';
+            document.getElementById('quiz-q-text').innerText = q.q;
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`txt-choice-${i}`).innerText = q.choices[i].text;
+            }
+        }
+
+        function answerQuestion(choiceIdx) {
+            playSound('click');
+            let q = questions[currentIdx];
+            let dim = q.choices[choiceIdx].dim;
+            scores[dim]++;
+
+            currentIdx++;
+            showToast("✨ 답변 완료!");
+            renderQuestion();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('quick-toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 1000);
+        }
+
+        /* 16가지 MBTI 유형별 신라대학교 특성화 학과 매칭 데이터 */
+        const deptResults = {
+            "ENFP": { dept: "항공서비스학과", sub: "항공운항학과, 호텔관광학과", emoji: "✈️🤪", desc: "넘치는 인싸력과 긍정 에너지를 주체하지 못하는 당신! 기내 승무원이 되어 전 세계를 누비며 승객들에게 연예인급 미소와 입담을 선사할 운명입니다.", career: "대형 항공사 수석 객실승무원 및 글로벌 서비스 매니저" },
+            "INTJ": { dept: "AI로봇학과", sub: "컴퓨터교육과, 게임콘텐츠디자인학과", emoji: "🤖🧐", desc: "세상을 뒤엎을 혁신적인 인공지능 알고리즘을 설계하고 로봇 군단을 지휘하고 싶어 하는 천재 공학도 타입! 방구석에서 프롬프트를 입력하며 미래 기술을 창조합니다.", career: "생성형 AI 수석 엔지니어 및 로봇 스타트업 CEO" },
+            "ESFP": { dept: "외식조리학부", sub: "식품영양전공, 베이커리전공", emoji: "🍳🔥", desc: "화려한 조명과 맛있는 냄새가 있는 곳이라면 어디든 달려가는 파티 피플! 주방을 클럽 스테이지로 바꾸어 미슐랭 스타 셰프의 향기를 내뿜으며 인생을 즐깁니다.", career: "미슐랭 스타 특급호텔 셰프 및 푸드 컨설턴트" },
+            "ISTJ": { dept: "소방안전학과", sub: "경찰행정학과, 응급구조학과", emoji: "🚒🛡️", desc: "법과 원칙을 철저히 지키며 지구상의 모든 위험으로부터 안전을 사수하는 철혈의 수호자! 매뉴얼대로 완벽하게 재난을 진압하고 동료들의 무한 신뢰를 받는 든든한 대장입니다.", career: "베테랑 소방 구조대장 및 재난 방재 전문가" },
+            "ENFJ": { dept: "사범대학 (교육학과/유아교육과)", sub: "국어·영어·수학교육과", emoji: "📚👑", desc: "사람들을 이끌고 가르치는 것에 영혼의 희열을 느끼는 타고난 리더! 영혼을 갈아 넣은 열정적인 수업으로 학생들의 눈물을 쏙 빼놓는 전설의 명교사로 등극합니다.", career: "공립 중등학교 수석 교사 및 교육행정 공무원" },
+            "INTP": { dept: "게임콘텐츠디자인학과", sub: "웹툰학과, 미디어문예창작학과", emoji: "🎮💤", desc: "현실 세계가 지루해서 머릿속에 온갖 우주와 판타지 세계관을 구축하고 사는 상상력 대마왕! 밤새워 게임 엔진을 돌리며 대작 메타버스 세상을 창조합니다.", career: "글로벌 게임 디렉터 및 3D 그래픽 아티스트" },
+            "ESTP": { dept: "경찰행정학과", sub: "체육학부, 소방안전학과", emoji: "🚨🏃", desc: "가만히 있으면 병이 나는 타고난 행동파 야수! 현장 체포술과 범죄 심리 분석 수업에서 눈이 반짝이며 범죄자를 때려잡는 상상을 하며 아드레날린을 폭발시킵니다.", career: "경찰공무원 및 범죄심리분석가 (프로파일러)" },
+            "ISFJ": { dept: "간호학과", sub: "물리치료학과, 치위생학과", emoji: "💉🥺", desc: "천사 같은 마음씨로 환자들의 아픔을 어루만져 주지만, 속으로는 '오늘 나이트 언제 끝나나'며 눈물을 삼키는 K-직장인 영웅! 완벽한 응급 처치로 병원을 살립니다.", career: "종합병원 수석 임상 전문 간호사 및 보건직 공무원" },
+            "ENTP": { dept: "항공운항학과", sub: "항공교통물류학부, 항공정비학과", emoji: "✈️😎", desc: "하늘 위를 제 집처럼 누비며 '내 비행에 불가능은 없다'며 허세와 실력을 동시에 겸비한 마성의 파일럿! 비행 제어 장치를 조작하며 짜릿한 속도감을 즐깁니다.", career: "대형 민항사 수석 기장 및 운항관리사" },
+            "INFJ": { dept: "상담치료학과", sub: "사회복지학과, 유아교육과", emoji: "💖😭", desc: "남의 고민을 들어주다가 자기가 더 과몰입해서 울고 있는 세상에서 가장 따뜻한 영혼의 소유자! 엉킨 마음을 치유하는 마법 같은 상담 리더로 활약합니다.", career: "전문 심리 상담가 및 청소년 쉼터 소장" },
+            "ESTJ": { dept: "경영학과", sub: "호텔관광학과, 문헌정보학과", emoji: "📊💼", desc: "효율과 이익을 따지지 않으면 온몸에 두드러기가 나는 철저한 자본주의 마스터! 엑셀 시트 하나로 회사의 매출을 300% 폭등시키는 냉철한 CEO 재목입니다.", career: "대기업 재무 분석가 및 경영 컨설턴트" },
+            "ISFP": { dept: "웹툰학과", sub: "실내건축디자인학과, 패션디자인학과", emoji: "🎨🛌", desc: "이불 밖은 위험해! 침대에 누워 영감을 받아 펜을 잡으면 세상 누구보다 위대한 대작 웹툰을 그려내는 감성 천재 작가! 마감일은 지키지 못해도 퀄리티는 전설입니다.", career: "네이버 웹툰 작가 및 일러스트레이터" },
+            "ENTJ": { dept: "건축학과 (5년제/4년제)", sub: "실내건축디자인학과, 경영학과", emoji: "🏢📐", desc: "도시 전체를 내 손으로 설계하고 통제하겠다는 야망 넘치는 건축왕! 5년 동안 설계실에서 밤을 새우며 미래의 랜드마크 빌딩을 도면 위에 창조합니다.", career: "건축사사무소 대표 및 도시 설계 디자이너" },
+            "ISTP": { dept: "항공정비학과", sub: "AI로봇학과, 소방안전학과", emoji: "🔧🔩", desc: "말수는 적지만 엔진 소리만 들어도 어디가 아픈지 기계와 대화가 가능한 정비의 신! 렌치 하나로 헬리콥터도 분해하고 조립하는 마초 엔지니어입니다.", career: "항공사 정비본부 수석 엔지니어 및 방위산업체 기술직" },
+            "ESFJ": { dept: "호텔관광학과", sub: "항공서비스학과, 경영학과", emoji: "🛎️✨", desc: "사람들을 환한 미소로 맞이하고 대접하는 것에 목숨을 거는 특급 호텔 서비스 마스터! 전 세계 관광객들의 마음을 사로잡는 마성의 서비스 리더입니다.", career: "특급 호텔 지배인 및 글로벌 관광 마케터" },
+            "INFP": { dept: "미디어문예창작학과", sub: "문화콘텐츠학과, 웹툰학과", emoji: "📝🌧️", desc: "비 오는 날 창밖을 보며 슬픈 드라마 주인공 시나리오를 쓰는 감성 폭발 로맨티스트! 눈물샘을 자극하는 명대사로 세상을 감동시키는 베스트셀러 작가.", career: "드라마 작가, 방송작가 및 출판사 편집자" }
+        };
+
+        function showResult() {
+            playSound('success');
+            document.getElementById('screen-quiz').style.display = 'none';
+            document.getElementById('screen-result').style.display = 'flex';
+
+            let e_i = scores.E >= scores.I ? "E" : "I";
+            let n_s = scores.N >= scores.S ? "N" : "S";
+            let t_f = scores.T >= scores.F ? "T" : "F";
+            let j_p = scores.J >= scores.P ? "J" : "P";
+            let mbti = e_i + n_s + t_f + j_p;
+
+            let res = deptResults[mbti] || deptResults["ENFP"];
+
+            document.getElementById('res-mbti-tag').innerText = `당신의 찰떡 MBTI: ${mbti}`;
+            document.getElementById('res-cartoon-emoji').innerText = res.emoji;
+            document.getElementById('res-dept-title').innerText = res.dept;
+            document.getElementById('res-sub-depts').innerText = `🔗 관련 연계 학과: ${res.sub}`;
+            document.getElementById('res-desc').innerText = res.desc;
+            document.getElementById('res-career-badge').innerText = `🎯 추천 신라대 진로: ${res.career}`;
+        }
+
+        function resetQuiz() {
+            playSound('click');
+            document.getElementById('screen-result').style.display = 'none';
+            document.getElementById('screen-start').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
